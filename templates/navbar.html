@@ -1,0 +1,105 @@
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap");
+  
+    body {
+      margin: 0px;
+    }
+  
+
+    :root {
+        --font-size-1: 72px;
+        --font-size-2: 54px;
+        --font-size-3: 42px;
+        --font-size-4: 24px;
+        --font-size-5: 18px;
+    
+        --bg-dark-forest: #293132;  /* Deep forest green, almost black */
+        --bg-mid-forest: #4A635D;  /* Mid-tone green-gray */
+        --bg-light-forest: #739B95;  /* Light green-gray */
+        --bg-purewhite: #FEFEFF;
+    
+        --fern-green: #4F7942;  /* Bright fern green for accents */
+        --moss-green: #8A9A5B;  /* Moss green for a softer contrast */
+        --pine-green: #01796F;  /* Pine green for strong accents */
+    
+        --font-black: #2F2F30;
+        --font-light-grey: #A6A6AB;
+        --font-white: #FAFAFD;
+    }
+    
+    
+    body {
+        font-family: Arial, sans-serif;
+        color: var(--font-black);
+        background-color: var(--bg-white);
+        margin: 0;
+      }
+
+    body,
+    button,
+    input,
+    textarea {
+      font-family: "Quicksand", sans-serif;
+    }
+  
+    .logo {
+      height: 40px;
+      margin-right: 10px;
+      background-color: var(--bg-dark-forest);
+    }
+  
+    nav {
+      background-color: var(--bg-dark-forest);
+      color: var(--bg-purewhite);
+      height: 10vh;
+      padding: 0 1vw;
+      top: 0;
+      left: 0;
+      width: 98.5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+    }
+  
+    .nav-links a,
+    p {
+      text-decoration: none;
+      padding: 10px;
+      color: var(--moss-green);
+      font-size: var(--font-size-4);
+    }
+  
+    #title {
+      font-size: var(--font-size-2);    
+      color: var(--fern-green);
+      text-decoration: none;
+      margin-left: 1vw;
+    }
+  
+    #nav-username {
+      font-weight: bold;
+    }
+  </style>
+  <nav>
+    <a id="title" href="/"
+      ><img
+        src="{{ url_for('static', filename='res/logo.png') }}"
+        class="logo"
+      />The Forest</a
+    >
+  
+    <ul class="nav-links">
+      <li><a href="/demo">Demo</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/products">Products</a></li>
+      <li><a href="/login">Log In</a></li>
+      <li><a href="/register">Register</a></li>
+    </ul>
+  </nav>

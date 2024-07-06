@@ -1,0 +1,28 @@
+:root {
+    --font-size-1: 72px;
+    --font-size-2: 54px;
+    --font-size-3: 42px;
+    --font-size-4: 24px;
+    --font-size-5: 18px;
+
+    --bg-dark-forest: #293132;  /* Deep forest green, almost black */
+    --bg-mid-forest: #4A635D;  /* Mid-tone green-gray */
+    --bg-light-forest: #739B95;  /* Light green-gray */
+    --bg-purewhite: #FEFEFF;
+
+    --fern-green: #4F7942;  /* Bright fern green for accents */
+    --moss-green: #8A9A5B;  /* Moss green for a softer contrast */
+    --pine-green: #01796F;  /* Pine green for strong accents */
+
+    --font-black: #2F2F30;
+    --font-light-grey: #A6A6AB;
+    --font-white: #FAFAFD;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    color: var(--font-black);
+    background-color: var(--bg-white);
+    margin: 0;
+  }
