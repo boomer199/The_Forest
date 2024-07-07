@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Forest</title>
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Disables scrollbars */
+            height: 100%; /* Ensures the body takes full viewport height */
+            width: 100%; /* Ensures the body takes full viewport width */
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                width: 90%; /* Reduces the width on smaller screens */
+                height: auto; /* Makes height flexible */
+                padding: 0.5em;
+            }
+        }
+        
+        /* Main container styling to center everything inside it */
+        .main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            background-color: #293132; /* Dark forest green background for contrast */
+        }
+
+        /* Card styling for a larger and more central appearance */
+        .card {
+            width: 320px; /* Larger width */
+            height: 420px; /* Larger height */
+            padding: 1em; /* Adjust padding to scale with the card size */
+            background: #f5f5f5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            border-radius: 10px; /* Optional: adds rounded corners for a smoother look */
+            display: flex;
+            flex-direction: column; /* Organizes children elements in a column */
+            justify-content: space-between; /* Distributes space between children */
+            }
+
+        /* Image styling adjustments for a better fit in the larger card */
+        .card-img {
+            height: 50%; /* Takes up half of the card's height */
+            background-color: #ffcaa6;
+            border-radius: 10px 10px 0 0; /* Rounded corners at the top */
+            transition: .3s ease;
+        }
+
+        /* Footer styling to align elements nicely at the bottom */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-top: 2px solid #ddd; /* Slightly thicker to match the larger card */
+        }
+
+        /* Button enhancements for a more clickable area */
+        .card-button {
+            padding: 10px 20px; /* Larger padding for a bigger button */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hover effects adjusted for the new sizes */
+        .card-img:hover {
+            transform: translateY(-10%); /* Less movement as the image is larger */
+            box-shadow: rgba(226, 196, 63, 0.25) 0px 20px 30px -10px, rgba(180, 71, 71, 0.3) 0px 10px 20px -5px;
+        }
+        .card-button:hover {
+            background-color: #ffcaa6; /* Ensures the color fills the larger button */
+        }
+
+        /* Styling for the checkout button */
+        #checkout-button {
+            font-size: 1.1em; /* Larger font size for better readability */
+            padding: 15px 30px; /* Ample padding for a more touch-friendly button */
+            background-color: var(--fern-green); /* A green color for positive action */
+            color: white; /* White text color for contrast */
+            border: none; /* No border for a cleaner look */
+            border-radius: 5px; /* Slightly rounded corners for a modern look */
+            cursor: pointer; /* Cursor indicates clickable item */
+            transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Subtle shadow to lift the button off the page */
+        }
+
+        #checkout-button:hover, #checkout-button:focus {
+            background-color: var(--moss-green); /* A slightly lighter green on hover/focus for feedback */
+            transform: translateY(-2px); /* Slight raise effect on hover */
+            box-shadow: 0 6px 9px rgba(0,0,0,0.15); /* Increased shadow on hover for depth effect */
+        }
+
+        #checkout-button:active {
+            background-color: #397739; /* Even darker green when the button is clicked */
+            transform: translateY(1px); /* Button appears pressed down when clicked */
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2); /* Smaller shadow to simulate pressing depth */
+        }
+
+
+           
+    </style>
+
+  </head>
+  <body>
+    {{header | safe}}
+    <div class = "main">
+        <div class="card">
+        
+            <div class="card-img"></div>
+            <div class="card-info">
+              <p class="text-title">Premium Access</p>
+              <p class="text-body">Product description and details</p>
+            </div>
+            <div class="card-footer">
+            <span class="text-title">$5.00</span>
+            <form action="/create-checkout-session" method="POST">
+                <button type="submit" id="checkout-button">
+                    Checkout
+                </button>
+            </form>
+            
+          </div>
+        </div>
+    </div
+    
+  </body>
+</html>
