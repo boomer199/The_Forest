@@ -36,15 +36,16 @@ def success():
     """
     return render_template("success.html", header=get_header())
 
-@app.route("/cancel", methods=['GET'])
-def cancel():
+@app.route("/cancel.html", methods=['GET'])
+def cancel_html():
     """
-    Renders the cancel.html template with the header/navbar.
+    An alternative route to serve the cancel.html template.
 
     Returns:
         str: Rendered template for the cancel page.
     """
     return render_template("cancel.html", header=get_header())
+
 
 @app.route("/checkout", methods=['GET'])
 def checkout():
