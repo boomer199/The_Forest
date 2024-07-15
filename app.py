@@ -2,7 +2,6 @@ from flask import Flask, request, session, flash, render_template, redirect, jso
 from config import  MY_DOMAIN, MY_PORT, STRIPE_PRICE_ID, TEST_STRIPE_SECRET_KEY, MONGO_URI
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
-import db
 import stripe
 import os   
 from pymongo.mongo_client import MongoClient
@@ -43,16 +42,6 @@ def get_header(**kwargs):
 def is_logged_in():
     return 'user_id' in session
 
-
-    """
-        @app.route('/dashboard')
-        def dashboard():
-            if not is_logged_in():
-                return redirect(url_for('login'))
-            # Load user data or perform actions for logged-in users
-            return render_template('dashboard.html', header=get_header())
-    """
-
 @app.route('/premium', methods=['GET'])
 def premium():
     if not is_logged_in():
@@ -71,6 +60,8 @@ def register():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        username = request.form['username']
+
 
         # Check if the user already exists
         if users.find_one({'email': email}):
@@ -81,11 +72,12 @@ def register():
         users.insert_one({
             'password': hashed_pwd,
             'email': email,
+            'username': username,
             'premium': False
         })
 
         return render_template('login.html', header = get_header())
-    return render_template('register.html', header = get_header())
+    return render_template('login.html', header = get_header())
 
 @app.route('/logout')
 def logout():
@@ -103,10 +95,11 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = str(user['_id'])  # Store the user ID in the session
             session.modified = True
+            print("1")
             return render_template('index.html', header=get_header())
         else:
+            print("2")
             return render_template('login.html', header=get_header(), error="Invalid credentials")
-
     return render_template('login.html', header=get_header())
 
 

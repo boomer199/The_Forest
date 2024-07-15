@@ -3,154 +3,152 @@
         <link rel="stylesheet" href="./static/styles/style.css">
         <title>The Forest</title>
         <style>
-            html, body {
-                margin: 0;
-                padding: 0;
-                overflow: hidden; /* Disables scrollbars */
-                height: 100%; /* Ensures the body takes full viewport height */
-                width: 100%; /* Ensures the body takes full viewport width */
-            }
 
-            .form-control {
-                position: relative;
-                margin: 20px 0 40px;
-                width: 190px;
-              }
-              
-              .form-control input {
-                background-color: transparent;
-                border: 0;
-                border-bottom: 2px #fff solid;
-                display: block;
-                width: 100%;
-                padding: 15px 0;
-                font-size: 18px;
-                color: var(--fern-green);
-              }
-              
-              .form-control input:focus,
-              .form-control input:valid {
-                outline: 0;
-                border-bottom-color: lightblue;
-              }
-              
-              .form-control label {
-                position: absolute;
-                top: 15px;
-                left: 0;
-                pointer-events: none;
-              }
-              
-              .form-control label span {
-                display: inline-block;
-                font-size: 18px;
-                min-width: 5px;
-                color: #var(--fern-green);
-                transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-              }
-              
-              .form-control input:focus+label span,
-              .form-control input:valid+label span {
-                color: lightblue;
-                transform: translateY(-30px);
-              }
+          html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Disables scrollbars */
+            height: 100%; /* Ensures the body takes full viewport height */
+            width: 100%; /* Ensures the body takes full viewport width */
+           }
+          .main {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff; /* Light background for the form */
+            max-width: 320px;
+            max-height: 460px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 7px 7px 10px 3px #24004628;
+            padding: 24px;
+        }
+          
+          .form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 24px;
+          }
+          
+          /*checkbox to switch from sign up to login*/
+          #chk {
+            display: none;
+          }
+          
+          /*Login*/
+          .login {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+          
+          .login label {
+            margin: 25% 0 5%;
+            color: var(--fern-green)
+          }
+          
+          label {
+            color: var(--moss-green);
+            font-size: 2rem;
+            justify-content: center;
+            display: flex;
+            font-weight: bold;
+            cursor: pointer;
+            transition: .5s ease-in-out;
+          }
+          
+          .input {
+            width: 100%;
+            height: 40px;
+            background: #e0dede;
+            padding: 10px;
+            border: none;
+            outline: none;
+            border-radius: 4px;
+          }
+          
+          /*Register*/
+          .register {
+            background: #eee;
+            border-radius: 60% / 10%;
+            transform: translateY(5%);
+            transition: .8s ease-in-out;
+          }
+          
+          .register label {
+            color: #var(--moss-green);
+            transform: scale(.6);
+          }
+          
+          #chk:checked ~ .register {
+            transform: translateY(-60%);
+          }
+          
+          #chk:checked ~ .register label {
+            transform: scale(1);
+            margin: 10% 0 5%;
+          }
+          
+          #chk:checked ~ .login label {
+            transform: scale(.6);
+            margin: 5% 0 5%;
+          }   
 
-              .box {
-                width: 140px;
-                height: auto;
-                float: left;
-                transition: .5s linear;
-                position: relative;
-                display: block;
-                overflow: hidden;
-                padding: 15px;
-                text-align: center;
-                margin: 0 5px;
-                background: transparent;
-                text-transform: uppercase;
-                font-weight: 900;
-              }
-              
-              .box:before {
-                position: absolute;
-                content: '';
-                left: 0;
-                bottom: 0;
-                height: 4px;
-                width: 100%;
-                border-bottom: 4px solid transparent;
-                border-left: 4px solid transparent;
-                box-sizing: border-box;
-                transform: translateX(100%);
-              }
-              
-              .box:after {
-                position: absolute;
-                content: '';
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 4px;
-                border-top: 4px solid transparent;
-                border-right: 4px solid transparent;
-                box-sizing: border-box;
-                transform: translateX(-100%);
-              }
-              
-              .box:hover {
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-              }
-              
-              .box:hover:before {
-                border-color: #262626;
-                height: 100%;
-                transform: translateX(0);
-                transition: .3s transform linear, .3s height linear .3s;
-              }
-              
-              .box:hover:after {
-                border-color: #262626;
-                height: 100%;
-                transform: translateX(0);
-                transition: .3s transform linear, .3s height linear .5s;
-              }
-              
-              button {
-                color: black;
-                text-decoration: none;
-                cursor: pointer;
-                outline: none;
-                border: none;
-                background: transparent;
-              }
+          /*Button*/
+          .form button {
+            width: 85%;
+            height: 40px;
+            margin: 12px auto 10%;
+            color: #fff;
+            background-color: var(--pine-green);
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: .2s ease-in;
+          }
+          
+          .form button:hover {
+            background-color: #005d55;
+          }
 
-              .main {
-                background-color = var(--bg-dark-forest)
-              }
+          .styler{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            background-color: #293132; /* Dark forest green background for contrast */
+          }
         </style>
     </head>
     <body>
-        {{header | safe}}
-        <div class = "main">
-        
-            <form action="/login" method="POST">
-        
-                <div class="form-control">
-                    <input type="email" name="email" id = "email" required />
-                    <label>
-                        <span style="transition-delay:0ms">E</span><span style="transition-delay:50ms">m</span><span style="transition-delay:100ms">a</span><span style="transition-delay:150ms">i</span><span style="transition-delay:200ms">l</span>
-                    </label>
-                </div>
-                <div class="form-control">
-                    <input type="password" name="password", id = "password" required />
-                    <label>
-                        <span style="transition-delay:0ms">P</span><span style="transition-delay:50ms">a</span><span style="transition-delay:100ms">s</span><span style="transition-delay:150ms">s</span><span style="transition-delay:200ms">w</span><span style="transition-delay:250ms">o</span><span style="transition-delay:300ms">r</span><span style="transition-delay:350ms">d</span>
-                    </label>
-                </div>
-                <button type="submit" class="box">Login</button>
-            
-            
-            </form>
+      {{header | safe}}        
+      <div class = "styler">
+      
+        <div class="main">  	
+          <input type="checkbox" id="chk" aria-hidden="true">
+      
+            <div class="login">
+              <form class="form" method = "POST" action = "/login">
+                <label for="chk" aria-hidden="true">Log in</label>
+                <input class="input" type="email" name="email" placeholder="Email" required="">
+                <input class="input" type="password" name="password" placeholder="Password" required="">
+                <button class = "txt">Log in</button>
+              </form>
+            </div>
+      
+            <div class="register">
+              <form class="form" method = "POST" action = "/register">
+                <label for="chk" aria-hidden="true">Register</label>
+                <input class="input" type="text" name="username" placeholder="Username" required="">
+                <input class="input" type="email" name="email" placeholder="Email" required="">
+                <input class="input" type="password" name="password" placeholder="Password" required="">
+                <button>Register</button>
+              </form>
+            </div>
         </div>
+      </div>
     </body>
 </html>
