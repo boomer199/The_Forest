@@ -3,3 +3,4 @@ env/
 __pycache__/
 /.env
 predictions.csv
+price_data.csv
