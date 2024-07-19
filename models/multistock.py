@@ -434,19 +434,9 @@ def run_script(tickers = ["AAPL", "JPM", "XLY"]):
     shared_predictions = predict_next_day_prices(tickers)
     
     print(len(shared_predictions))
-    #append_data(shared_predictions=shared_predictions)
-    #print(f'Predictions saved: {shared_predictions}')
+    append_data(shared_predictions=shared_predictions)
+    print(f'Predictions saved: {shared_predictions}')
 
-    #calculate_accuracy(prediction_date=date.today() - timedelta(days=1))
+    calculate_accuracy(prediction_date=date.today() - timedelta(days=1))
     
     return shared_predictions
-
-
-# List of tickers to predict (personal testing)
-tickers = ['AAPL', 'JPM', 'SPY', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'V',
-           'JNJ', 'WMT', 'PG', 'UNH', 'NVDA', 'DIS', 'PYPL', 'HD', 'MA', 'VZ',
-           'NFLX', 'INTC', 'MRK', 'PEP', 'KO', 'XOM', 'CSCO', 'ABT', 'CMCSA', 'ADBE',
-           'CRM', 'PFE', 'AVGO', 'T', 'ABBV', 'NKE', 'COST', 'MDT', 'MCD', 'TXN',
-           'HON', 'WFC', 'QCOM', 'BMY', 'UNP', 'PM', 'LLY', 'IBM', 'NEE', 'SBUX', 'XLY', "VYM"]
-
-#run_script(tickers)
