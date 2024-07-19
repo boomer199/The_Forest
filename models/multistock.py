@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import yfinance as yf
+import csv
+import json
+import ast
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -12,7 +15,7 @@ from sklearn.metrics import accuracy_score
 
 from xgboost import XGBClassifier
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 def grab_price_data():
 
@@ -74,6 +77,17 @@ price_data["change_in_price"] = np.where(mask == True, np.nan, price_data["chang
                                                                                               
 #see all null vals                                                                                              
 price_data[price_data.isna().any(axis=1)]
+
+def smooth_data(days_out):
+    # Group by symbol, then apply the rolling function and grab the Min and Max.
+    price_data_smoothed = price_data.groupby(['symbol'])[['close','low','high','open','volume']].transform(lambda x: x.ewm(span = days_out).mean())
+
+    # Join the smoothed columns with the symbol and datetime column from the old data frame.
+    smoothed_df = pd.concat([price_data[['symbol','datetime']], price_data_smoothed], axis=1, sort=False)
+    
+    # create a new column that will house the flag, and for each group calculate the diff compared to days_out days ago. Then use Numpy to define the sign.
+    price_data['Signal_Flag'] = smoothed_df.groupby('symbol')['close'].transform(lambda x : np.sign(x.diff(days_out)))
+smooth_data(5)
 
 # Calculate the 14 day RSI
 n = 14
@@ -229,7 +243,7 @@ price_data = price_data.dropna()
 print('After NaN Drop we have {} rows and {} columns'.format(price_data.shape[0], price_data.shape[1]))
 
 # Grab our X & Y Columns.
-X_Cols = price_data[['RSI','k_percent','r_percent','Price_Rate_Of_Change','MACD','On Balance Volume']]
+X_Cols = price_data[['RSI','k_percent','r_percent','Price_Rate_Of_Change','MACD','On Balance Volume', 'Signal_Flag']]
 Y_Cols = price_data['Prediction']
 
 # Split X and y into X_
@@ -326,21 +340,113 @@ def predict_next_day_prices(tickers):
         next_day_prices2[ticker] = "Up" if prediction2[0] == 1 else "Down"
     
     shared_items = {k: next_day_prices[k] for k in next_day_prices if k in next_day_prices2 and next_day_prices[k] == next_day_prices2[k]}
-    return shared_items, next_day_prices, next_day_prices2
+    return shared_items
 
 
-# List of tickers to predict
+def append_data(json_file="predictions.json", shared_predictions=None):
+    if shared_predictions is None:
+        shared_predictions = {'AAPL': 'Up', 'GOOGL': 'Down'}  # Example default
+
+    # Check if file exists and is not empty
+    try:
+        with open(json_file, 'r') as file:
+            data = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}  # Initialize with an empty dictionary if file is not found or empty
+
+    # Update data with new predictions
+    data[str(date.today())] = shared_predictions
+
+    # Save the updated data back to the JSON file
+    with open(json_file, 'w') as file:
+        json.dump(data, file, indent=4)
+    
+
+def fetch_closing_prices(symbols, prediction_date):
+    # Ensure symbols is a list for proper handling by yfinance
+    if isinstance(symbols, str):
+        symbols = [symbols]
+
+    # Check if the prediction_date is a Monday
+    if prediction_date.weekday() == 0:  # 0 is Monday
+        # Set start_date to the previous Friday
+        start_date = prediction_date - timedelta(days=3)
+    else:
+        # Typically, the previous day's close is needed
+        start_date = prediction_date - timedelta(days=1)
+
+    end_date = prediction_date
+
+    data = yf.download(symbols, start=start_date, end=end_date)
+    # Ensure we return the Close prices for both days
+    return data['Close']
+
+def calculate_accuracy(json_file="predictions.json", prediction_date=date.today()):
+    try:
+        with open(json_file, 'r') as file:
+            all_data = json.load(file)
+            predictions = all_data.get(str(prediction_date))
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading JSON data: {e}")
+        return
+
+    if not predictions:
+        print("No predictions found for the specified date.")
+        return
+
+    symbols = list(predictions.keys())
+    closing_prices = fetch_closing_prices(symbols, prediction_date)
+
+    # Check if closing_prices is a DataFrame or Series and handle accordingly
+    if isinstance(closing_prices, pd.Series):
+        # Convert Series to DataFrame if only one symbol's data was fetched
+        closing_prices = closing_prices.to_frame().T
+
+    correct_predictions = 0
+    total_predictions = len(predictions)
+
+    results = {}
+
+    # Assuming the DataFrame has rows as dates and columns as symbols
+    if len(closing_prices) > 1:
+        previous_close = closing_prices.iloc[0]
+        prediction_close = closing_prices.iloc[1]
+    else:
+        print("Insufficient data fetched for price comparison.")
+        return
+
+    for symbol, prediction in predictions.items():
+        if symbol in prediction_close:
+            is_correct = (prediction == 'Up' and prediction_close[symbol] > previous_close[symbol]) or \
+                         (prediction == 'Down' and prediction_close[symbol] < previous_close[symbol])
+            results[symbol] = "Correct" if is_correct else "Incorrect"
+            if is_correct:
+                correct_predictions += 1
+
+    # Calculate and print overall accuracy
+    accuracy_percentage = (correct_predictions / total_predictions) * 100
+    print(f"Overall Accuracy: {accuracy_percentage:.2f}%")
+    print("Individual Results:", results)
+    
+
+def run_script(tickers = ["AAPL", "JPM", "XLY"]):
+    
+    shared_predictions = predict_next_day_prices(tickers)
+    
+    print(len(shared_predictions))
+    #append_data(shared_predictions=shared_predictions)
+    #print(f'Predictions saved: {shared_predictions}')
+
+    #calculate_accuracy(prediction_date=date.today() - timedelta(days=1))
+    
+    return shared_predictions
+
+
+# List of tickers to predict (personal testing)
 tickers = ['AAPL', 'JPM', 'SPY', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'V',
            'JNJ', 'WMT', 'PG', 'UNH', 'NVDA', 'DIS', 'PYPL', 'HD', 'MA', 'VZ',
            'NFLX', 'INTC', 'MRK', 'PEP', 'KO', 'XOM', 'CSCO', 'ABT', 'CMCSA', 'ADBE',
            'CRM', 'PFE', 'AVGO', 'T', 'ABBV', 'NKE', 'COST', 'MDT', 'MCD', 'TXN',
            'HON', 'WFC', 'QCOM', 'BMY', 'UNP', 'PM', 'LLY', 'IBM', 'NEE', 'SBUX', 'XLY', "VYM"]
 
-# Get predictions
-shared_predictions, next_day_predictions, _ = predict_next_day_prices(tickers)
-
-print(f'Predictions saved: {shared_predictions}')
-
-def calculate_accuracy(csv = "predictions.csv"):
-    with open(csv,'a') as fd:
-        fd.write(myCsvRow)
+#run_script(tickers)

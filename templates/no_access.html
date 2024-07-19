@@ -10,10 +10,25 @@
                 height: 100%; /* Ensures the body takes full viewport height */
                 width: 100%; /* Ensures the body takes full viewport width */
             }
+            .content {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
         {{header | safe}}
+        <div class = "content">
+            <h2>
+                You have no access to this page.
+            </h2>
+            <h4>
+                Please purchase a premium plan to access this page.
+            </h4>
+        </div>
         
     </body>
 </html>

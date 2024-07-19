@@ -1,10 +1,18 @@
 from flask import Flask, request, session, flash, render_template, redirect, jsonify
-from config import  MY_DOMAIN, MY_PORT, STRIPE_PRICE_ID, TEST_STRIPE_SECRET_KEY, MONGO_URI
+from config import MONGO_URL
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 import stripe
 import os   
 from pymongo.mongo_client import MongoClient
+
+from models import multistock 
+
+#get env vars
+MY_DOMAIN = os.environ["MY_DOMAIN"]
+MY_PORT = os.environ["MY_PORT"]
+STRIPE_PRICE_ID = os.environ["STRIPE_PRICE_ID"]
+TEST_STRIPE_SECRET_KEY = os.environ["TEST_STRIPE_SECRET_KEY"]
 
 stripe.api_key = TEST_STRIPE_SECRET_KEY
 
@@ -12,7 +20,7 @@ app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 app.secret_key = os.urandom(24)
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URL)
 
 db = client["forestdb"]
 
@@ -22,25 +30,45 @@ users = db.users
 app.config["SESSION_TYPE"] = "mongodb"
 app.config["SESSION_PERMANENT"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400  # Sessions last for one day
-app.config["SESSION_MONGODB"] = MongoClient(MONGO_URI)
+app.config["SESSION_MONGODB"] = MongoClient(MONGO_URL)
 app.config["SESSION_MONGODB_DB"] = "forestdb"
 app.config["SESSION_MONGODB_COLLECT"] = "sessions"
 
 
-def get_header(**kwargs):
+def get_header():
     """
     Returns the rendered template for the header/navbar.
-
-    Args:
-        **kwargs: Keyword arguments to pass to the template.
 
     Returns:
         str: Rendered template for the header/navbar.
     """
-    return render_template("navbar.html", **kwargs)
+    user = get_user()
+    return render_template("navbar.html", user=user)
+
+
+def get_user():
+    """
+    Retrieves the user details from MongoDB.
+
+    Returns:
+        dict: User details including account type, username, and email.
+    """
+    if is_logged_in():
+        user_id = session.get('user_id')
+        user = users.find_one({'_id': ObjectId(user_id)})
+        if user:
+            return {
+                'account_type': user.get('premium', False),
+                'username': user.get('username', ''),
+                'email': user.get('email', '')
+            }
+    return None
+
+
 
 def is_logged_in():
     return 'user_id' in session
+
 
 @app.route('/premium', methods=['GET'])
 def premium():
@@ -50,7 +78,7 @@ def premium():
     user = users.find_one({'_id': ObjectId(user_id)})
     if user and user.get('premium', False):
         return render_template('premium.html', header=get_header())
-    return render_template('not_premium.html', header=get_header(), message="Please purchase a premium plan to access this page.")
+    return render_template('no_access.html', header=get_header())
 
     
     
@@ -117,7 +145,7 @@ def success():
         if stripe_session.payment_status == 'paid':
             user_id = stripe_session.metadata['user_id']
             users.update_one({'_id': ObjectId(user_id)}, {'$set': {'premium': True}})
-            return render_template("success.html", header=get_header(), message="Thank you for your purchase!")
+            return render_template("success.html", header=get_header())
     except StripeError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:

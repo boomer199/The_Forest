@@ -2,5 +2,5 @@ config.py
 env/
 __pycache__/
 /.env
-predictions.csv
+predictions.json
 price_data.csv
