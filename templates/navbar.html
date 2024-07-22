@@ -96,17 +96,19 @@
   >
 
   <ul class="nav-links">
-    <li><a href="/demo">Demo</a></li>
+    {% if user.account_type == False or user == None%}
+    <li><a href="/demo_load">Demo</a></li>
+    {% endif %}
     <li><a href="/about">About</a></li>
     <li><a href="/checkout">Products</a></li>
     {% if user == None %}
     <li><a href="/login">Log In</a></li>
     {% endif %}
     {% if user != None %}
-    <li><a href="/logout">Log out</a></li>
     {% if user.account_type == True %}
-    <li><a href="/premium">Premium</a></li>
+    <li><a href="/premium_load">Premium</a></li>
     {% endif %}
+    <li><a href="/logout">Log out</a></li>
     {% endif %}
   </ul>
 </nav>

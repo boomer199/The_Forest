@@ -1,0 +1,216 @@
+<html>
+    <head>
+        <title>The Forest</title>
+        <link rel="stylesheet" href="./static/styles/style.css">
+        <style>
+
+
+            /* General body styling */
+            body {
+                margin: 0;
+                overflow: hidden;
+                height: 100vh; /* Ensures full viewport height */
+                width: 100%;
+                background-color: var(--bg-dark-forest);
+            }
+            html{
+                background-color: var(--bg-dark-forest);
+            }
+
+            /* Container for cards */
+            .card-container {
+                width: 90%; /* Adjusts width */
+                max-width: 1200px; /* Maximum width for better layout control */
+                margin: 20px auto; /* Centers container and adds vertical spacing */
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around; /* Provides equal spacing around each card */
+                gap: 20px; /* Space between cards */
+            }
+
+            /* Card styling */
+            .card {
+                width: 190px;
+                height: 254px;
+                border-radius: 20px;
+                background: #f5f5f5;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.8rem;
+                border: 2px solid #c3c6ce;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s, border-color 0.3s;
+            }
+
+            .card:hover {
+                border-color: #6c00f8;
+                box-shadow: 0 8px 16px rgba(108, 0, 248, 0.4);
+            }
+
+            .card-details {
+                color: rgb(162, 0, 255);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5em;
+                font-family: 'Courier New', Courier, monospace;
+            }
+
+            .card-button {
+                width: 70%;
+                border-radius: 1rem;
+                border: none;
+                background-color: #6c00f8;
+                color: #fff;
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+                text-decoration: none;
+                text-align: center;
+                cursor: pointer;
+                transition: background-color 0.2s, transform 0.2s;
+            }
+
+            .card-button:hover {
+                background-color: #7a4ef8;
+                transform: scale(1.05);
+            }
+
+
+            .text-title {
+                font-size: 1.5em;
+                font-weight: bold;
+                margin-bottom: 5px; /* Space between title and body */
+            }
+
+            .text-body {
+                color: rgb(134, 134, 134);
+            }
+
+            .card:hover {
+                border-color: #6c00f8;
+                box-shadow: 0 8px 16px rgba(108, 0, 248, 0.4); /* Enhanced hover shadow */
+            }
+
+            .input-form {
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box; /* Includes padding in width */
+                display: flex;
+                align-items: center; /* Vertical alignment of form elements */
+                justify-content: space-around; /* Even spacing between elements */
+                background-color: var(--bg-dark-forest); /* Background color of the form */
+                margin-bottom: 30px; /* Space between form and cards */
+            }
+            
+            .input-form label {
+                margin-right: 10px; /* Space between label and input/selector */
+                font-weight: bold; /* Makes labels bold */
+                color: var(--fern-green);
+            }
+
+            
+            .input-form select, .input-form input[type="text"], .input-form input[type="checkbox"] {
+                padding: 10px;
+                margin-right: 20px; /* Space between form elements */
+                border: 1px solid #ccc; /* Border for inputs */
+                border-radius: 4px; /* Rounded corners for inputs */
+            }
+            
+            .input-form button {
+                padding: 10px 20px;
+                background-color: var(--pine-green); /* Button color to match other elements */
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer; /* Hand cursor on hover */
+                transition: background-color 0.3s;
+            }
+            
+            .input-form button:hover {
+                background-color: #016058;
+            }
+            
+            .alert {
+                padding: 10px;
+                background-color: #f44336; /* Red for visibility */
+                color: white;
+                margin-bottom: 15px;
+                border-radius: 4px;
+                text-align: center;
+            }
+            
+            .flash-messages {
+                position: fixed; /* Fixed at the top of the page */
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1001; /* Make sure it's above other content */
+                width: 80%;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+
+        </style>
+        <script>
+        
+            window.onload = function() {
+                setTimeout(function() {
+                    var flashMessage = document.getElementById('flash-message');
+                    if (flashMessage) {
+                        flashMessage.style.display = 'none'; // Hides the flash message
+                    }
+                }, 7000); // 7000 milliseconds = 7 seconds
+            };  
+
+            
+            
+        </script>
+    </head>
+    <body>
+        {{ header | safe }}
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert" id="flash-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+           
+        
+
+        <form action="/demo" method="post" class="input-form">
+            <label for="timeframe">Timeframe:</label>
+            <select id="timeframe" name="timeframe">
+                <option value="1d">1 Day</option>
+                <option value="1w">1 Week</option>
+                <option value="1m">1 Month</option>
+                <option value="3m">3 Months</option>
+            </select>
+        
+            <label for="smoothing">Smoothing:</label>
+            <input type="checkbox" id="smoothing" name="smoothing">
+        
+            <label for="customStocks">Custom Stocks (Spaced With A Comma):</label>
+            <input type="text" id="customStocks" name="customStocks" placeholder="Enter stock symbols, e.g., AAPL, MSFT">
+        
+            <button type="submit">Submit</button>
+        </form>
+        
+        <div class="card-container">
+            {% for key, value in data.items() %}
+            <div class="card">
+                <div class="card-details">
+                    <p class="text-title">{{ key }}</p>
+                    <p class="text-body">{{ value }}</p>
+                </div>
+                <a class="card-button" href="https://finance.yahoo.com/quote/{{key}}/">YFinance</a>
+            </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

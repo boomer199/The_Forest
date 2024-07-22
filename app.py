@@ -6,6 +6,7 @@ import stripe
 import os   
 from pymongo.mongo_client import MongoClient
 
+
 from models import multistock 
 
 #get env vars
@@ -167,6 +168,32 @@ def cancel_html():
         return render_template("cancel.html", header=get_header())
 
 
+
+@app.route("/demo", methods=["POST"])
+def demo_post():
+    user_id = session.get('user_id')
+    user = users.find_one({'_id': ObjectId(user_id)})
+    flash("Please purchase premium to utilize these features.", "Denial")
+    d = multistock.run_script()
+    if user and user.get('premium', True):
+        return render_template('premium.html', header=get_header())
+    return render_template("demo.html", header=get_header(), data=d)
+
+@app.route("/demo", methods=["GET"])
+def demo():
+    user_id = session.get('user_id')
+    user = users.find_one({'_id': ObjectId(user_id)})
+    """
+    Renders the demo.html template with the header/navbar.
+
+    Returns:
+        str: Rendered template for the demo page.
+    """
+    d = multistock.run_script()
+    if user and user.get('premium', True):
+        return render_template('premium.html', header=get_header())
+    return render_template("demo.html", header=get_header(), data=d)
+
 @app.route("/checkout", methods=['GET'])
 def checkout():
     """
@@ -201,7 +228,14 @@ def create_checkout_session():
 
     return redirect(checkout_session.url, code=303)
 
+@app.route("/demo_load", methods=["GET"])
+def demo_load():
+    return render_template("demo_load.html", header=get_header())
 
+
+@app.route("/premium_load", methods=["GET"])
+def premium_load():
+    return render_template("premium_load.html", header=get_header())
 
 @app.route("/")
 @app.route("/index")

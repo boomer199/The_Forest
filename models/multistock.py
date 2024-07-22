@@ -305,138 +305,52 @@ def grab_price_data(tickers_list):
 
 def predict_next_day_prices(tickers):
     if not os.path.exists('price_data.csv'):
+        # Assuming a function `grab_price_data` that fetches and saves data
         grab_price_data(tickers)
 
     price_data = pd.read_csv('price_data.csv')
-
-    # Assuming that the model requires certain features (adjust as per actual feature engineering steps)
-    # Prepare the features and target variable
     price_data['return'] = price_data['close'].pct_change()
     price_data['target'] = (price_data['return'] > 0).astype(int)
     price_data.dropna(inplace=True)
 
-    # Features and labels
     X = price_data[['open', 'high', 'low', 'close', 'volume']]
     y = price_data['target']
 
-    # Split the data (assuming a basic split, adjust as per the original notebook)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    model = XGBClassifier(**best_params, use_label_encoder=False, eval_metric='logloss')
+    model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
     model.fit(X_train, y_train)
-    model2 = RandomForestClassifier(n_estimators=100, oob_score=True, criterion="gini", random_state=0)
+    model2 = RandomForestClassifier(n_estimators=100, random_state=0)
     model2.fit(X_train, y_train)
 
-    # Make predictions for the next day
     next_day_prices = {}
     next_day_prices2 = {}
 
     for ticker in tickers:
-        latest_data = yf.download(ticker, period='1d', interval='1d').iloc[-1]
-        features = np.array([latest_data['Open'], latest_data['High'], latest_data['Low'], latest_data['Close'], latest_data['Volume']]).reshape(1, -1)
-        prediction1 = model.predict(features)
-        prediction2 = model2.predict(features)
-        next_day_prices[ticker] = "Up" if prediction1[0] == 1 else "Down"
-        next_day_prices2[ticker] = "Up" if prediction2[0] == 1 else "Down"
-    
-    shared_items = {k: next_day_prices[k] for k in next_day_prices if k in next_day_prices2 and next_day_prices[k] == next_day_prices2[k]}
-    return shared_items
+        latest_data = yf.download(ticker, period='1d', interval='1d')
+        if not latest_data.empty:
+            latest_row = latest_data.iloc[-1]
+            features = np.array([latest_row['Open'], latest_row['High'], latest_row['Low'], latest_row['Close'], latest_row['Volume']]).reshape(1, -1)
+            prediction1 = model.predict(features)
+            prediction2 = model2.predict(features)
+            next_day_prices[ticker] = "Up" if prediction1[0] == 1 else "Down"
+            next_day_prices2[ticker] = "Up" if prediction2[0] == 1 else "Down"
+        else:
+            next_day_prices[ticker] = "No data"
+            next_day_prices2[ticker] = "No data"
 
+    # Combining predictions with handling for disagreements
+    combined_predictions = {}
+    for ticker in tickers:
+        if next_day_prices[ticker] == next_day_prices2[ticker]:
+            combined_predictions[ticker] = next_day_prices[ticker]
+        else:
+            combined_predictions[ticker] = "Unpredictable"
 
-def append_data(json_file="predictions.json", shared_predictions=None):
-    if shared_predictions is None:
-        shared_predictions = {'AAPL': 'Up', 'GOOGL': 'Down'}  # Example default
+    return combined_predictions
 
-    # Check if file exists and is not empty
-    try:
-        with open(json_file, 'r') as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        data = {}  # Initialize with an empty dictionary if file is not found or empty
-
-    # Update data with new predictions
-    data[str(date.today())] = shared_predictions
-
-    # Save the updated data back to the JSON file
-    with open(json_file, 'w') as file:
-        json.dump(data, file, indent=4)
-    
-
-def fetch_closing_prices(symbols, prediction_date):
-    # Ensure symbols is a list for proper handling by yfinance
-    if isinstance(symbols, str):
-        symbols = [symbols]
-
-    # Check if the prediction_date is a Monday
-    if prediction_date.weekday() == 0:  # 0 is Monday
-        # Set start_date to the previous Friday
-        start_date = prediction_date - timedelta(days=3)
-    else:
-        # Typically, the previous day's close is needed
-        start_date = prediction_date - timedelta(days=1)
-
-    end_date = prediction_date
-
-    data = yf.download(symbols, start=start_date, end=end_date)
-    # Ensure we return the Close prices for both days
-    return data['Close']
-
-def calculate_accuracy(json_file="predictions.json", prediction_date=date.today()):
-    try:
-        with open(json_file, 'r') as file:
-            all_data = json.load(file)
-            predictions = all_data.get(str(prediction_date))
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error loading JSON data: {e}")
-        return
-
-    if not predictions:
-        print("No predictions found for the specified date.")
-        return
-
-    symbols = list(predictions.keys())
-    closing_prices = fetch_closing_prices(symbols, prediction_date)
-
-    # Check if closing_prices is a DataFrame or Series and handle accordingly
-    if isinstance(closing_prices, pd.Series):
-        # Convert Series to DataFrame if only one symbol's data was fetched
-        closing_prices = closing_prices.to_frame().T
-
-    correct_predictions = 0
-    total_predictions = len(predictions)
-
-    results = {}
-
-    # Assuming the DataFrame has rows as dates and columns as symbols
-    if len(closing_prices) > 1:
-        previous_close = closing_prices.iloc[0]
-        prediction_close = closing_prices.iloc[1]
-    else:
-        print("Insufficient data fetched for price comparison.")
-        return
-
-    for symbol, prediction in predictions.items():
-        if symbol in prediction_close:
-            is_correct = (prediction == 'Up' and prediction_close[symbol] > previous_close[symbol]) or \
-                         (prediction == 'Down' and prediction_close[symbol] < previous_close[symbol])
-            results[symbol] = "Correct" if is_correct else "Incorrect"
-            if is_correct:
-                correct_predictions += 1
-
-    # Calculate and print overall accuracy
-    accuracy_percentage = (correct_predictions / total_predictions) * 100
-    print(f"Overall Accuracy: {accuracy_percentage:.2f}%")
-    print("Individual Results:", results)
-    
-
-def run_script(tickers = ["AAPL", "JPM", "XLY"]):
-    
-    shared_predictions = predict_next_day_prices(tickers)
-    
-    print(len(shared_predictions))
-    append_data(shared_predictions=shared_predictions)
-    print(f'Predictions saved: {shared_predictions}')
-
-    calculate_accuracy(prediction_date=date.today() - timedelta(days=1))
-    
-    return shared_predictions
+def run_script(tickers = ["AAPL", "JPM", "NFLX"]):
+    combined_predictions = predict_next_day_prices(tickers)
+    print(len(combined_predictions))
+    print(f'Predictions saved: {combined_predictions}')    
+    return combined_predictions
