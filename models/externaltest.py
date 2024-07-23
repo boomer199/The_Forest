@@ -370,7 +370,7 @@ def fetch_closing_prices(symbols, prediction_date):
     # Check if the prediction_date is a Monday
     if prediction_date.weekday() == 0:  # 0 is Monday
         # Set start_date to the previous Friday
-        start_date = prediction_date - timedelta(days=3)
+        start_date = prediction_date - timedelta(days=1)
     else:
         # Typically, the previous day's close is needed
         start_date = prediction_date - timedelta(days=1)

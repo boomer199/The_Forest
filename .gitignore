@@ -4,3 +4,5 @@ __pycache__/
 /.env
 predictions.json
 price_data.csv
+notes.txt
+overview.ipynb
