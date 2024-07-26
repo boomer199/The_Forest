@@ -1,1 +1,273 @@
-filler
+<html>
+    <head>
+        <title>The Forest</title>
+        <link rel="stylesheet" href="./static/styles/style.css">
+        <style>
+
+
+            /* General body styling */
+            body {
+                margin: 0;
+                overflow-x: hidden;  /* Hide horizontal scrollbar and disable horizontal scrolling */
+                overflow-y: auto;    /* Allow vertical scrolling */
+                height: 100vh; /* Ensures full viewport height */
+                width: 100%;
+                background-color: var(--bg-dark-forest);
+            }
+            html{
+                background-color: var(--bg-dark-forest);
+            }
+
+            /* Container for cards */
+            .card-container {
+                width: 90%; /* Adjusts width */
+                max-width: 1200px; /* Maximum width for better layout control */
+                margin: 20px auto; /* Centers container and adds vertical spacing */
+                margin-top: 4%; /* Additional top margin for spacing */
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around; /* Provides equal spacing around each card */
+                gap: 20px; /* Space between cards */
+            }
+
+            /* Card styling */
+            .card {
+                width: 30%; /* Increased width for a wider card */
+                height: auto; /* Keep the height as is or adjust as needed */
+                border-radius: 10px;
+                background-color: #fff;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s, border-color 0.3s;
+            }
+            
+            .text-symbol {
+                margin-right: 0.4em;
+                font-size: 2.5em;
+                font-weight: bold;
+                color: black;
+                width: 100%;
+                text-align: center; /* Ensures the symbol text is centered */
+            }
+            
+            .text-prediction {
+                font-size: 1.8em;
+                color: white;
+                background-color: #ccc; /* Default grey background, change as per the status */
+                width: 70%; /* Adjust width as per design needs */
+                padding: 5px 10px;
+                border-radius: 5px;
+                display: flex;
+                align-items: center; /* Centers the prediction text */
+                justify-content: center; /* Centers the prediction text */
+                margin: 5px 0; /* Provides spacing from the symbol text */
+            }
+            
+            /* Specific backgrounds for predictions */
+            .text-prediction.up { background-color: #4CAF50; } /* Green for UP */
+            .text-prediction.down { background-color: #F44336; } /* Red for DOWN */
+            .text-prediction.unpredictable { background-color: #9E9E9E; } /* Grey for UNPREDICTABLE */
+            
+            .card-button {
+                width: 80%;
+                padding: 10px 0;
+                background-color: #000; /* Black background */
+                color: white;
+                border-radius: 10px;
+                text-decoration: none;
+                text-align: center;
+                cursor: pointer;
+                transition: background-color 0.2s, box-shadow 0.2s;
+            }
+            
+            .card-button:hover {
+                background-color: #333; /* Darker black on hover */
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            }
+            
+            .card:hover {
+                box-shadow: 0 8px 12px rgba(0,0,0,0.2); /* Enhanced hover shadow for visibility */
+            }
+            
+            .stock-prediction-container {
+                display: flex;
+                justify-content: space-between; /* Distributes space between symbol and prediction */
+                align-items: center; /* Centers items vertically */
+                width: 100%; /* Takes full width of the card */
+                margin-bottom: 10px; /* Adds space above the 'More Info' button */
+            }
+            
+            .text-symbol, .text-prediction {
+                flex: 1; /* Allows both items to grow and fill the container */
+                text-align: center; /* Centers the text */
+            }
+            
+            .text-symbol {
+                flex-basis: 40%; /* Gives less space to the symbol */
+                text-align: left; /* Aligns the symbol text to the left */
+            }
+            
+            .text-prediction {
+                flex-basis: 60%; /* Gives more space to the prediction */
+                text-align: right; /* Aligns the prediction text to the right */
+                padding: 5px 10px; /* Padding for better visual separation */
+            }
+               
+
+            .text-title {
+                font-size: 1.5em;
+                font-weight: bold;
+                margin-bottom: 5px; /* Space between title and body */
+            }
+
+            .text-body {
+                color: rgb(134, 134, 134);
+            }
+
+            .input-form {
+                background-color: white; /* White background for the form */
+                padding: 15px 20px; /* Reduced padding */
+                box-sizing: border-box;
+                display: flex;
+                align-items: center; /* Vertically aligns form elements */
+                justify-content: space-between; /* Distributes space evenly */
+                gap: 0.5em; /* Sets a gap between elements */
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Subtle shadow for depth */
+                margin: 20px auto; /* Centers the form */
+                width: 50%; /* Adjust width as needed */
+            }
+            
+            .input-form label {
+                margin-right: 0.5em; /* Adjust margin to space out label and input */
+                font-weight: bold;
+            }
+            
+            .input-form select, 
+            .input-form input[type="text"], 
+            .input-form input[type="checkbox"] {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            
+            .input-form button {
+                padding: 10px 20px;
+                background-color: var(--pine-green); /* Button color */
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            .input-form button:hover {
+                background-color: #016058; /* Darker green on hover */
+            }
+            
+            /* Ensure label and input pairs are not too spread out */
+            .input-group {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            
+            /* Align the checkbox properly with its label */
+            .input-form input[type="checkbox"] {
+                margin-left: 5px; /* Aligns checkbox right after the label text */
+            }
+            
+            
+            .alert {
+                padding: 10px;
+                background-color: #f44336; /* Red for visibility */
+                color: white;
+                margin-bottom: 15px;
+                border-radius: 4px;
+                text-align: center;
+            }
+            
+            .flash-messages {
+                position: fixed; /* Fixed at the top of the page */
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1001; /* Make sure it's above other content */
+                width: 80%;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+
+        </style>
+        <script>
+        
+            window.onload = function() {
+                setTimeout(function() {
+                    var flashMessage = document.getElementById('flash-message');
+                    if (flashMessage) {
+                        flashMessage.style.display = 'none'; // Hides the flash message
+                    }
+                }, 7000); // 7000 milliseconds = 7 seconds
+            };  
+
+            
+            
+        </script>
+    </head>
+    <body>
+        {{ header | safe }}
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert" id="flash-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+           
+        
+
+        <form action="/premium" method="post" class="input-form">
+            <div class="input-group">
+                <label for="timeframe">Timeframe:</label>
+                <select id="timeframe" name="timeframe">
+                    <option value="1d">1 Day</option>
+                    <option value="1w">1 Week</option>
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="smoothing">Smoothing:</label>
+                <input type="checkbox" id="smoothing" name="smoothing">
+            </div>
+            <div class="input-group">
+                <label for="customStocks">Custom Stocks:</label>
+                <input type="text" id="customStocks" name="customStocks" placeholder="Enter stock symbols, e.g., AAPL, MSFT">
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        
+        
+        <div class="card-container">
+            {% for key, value in data.items() %}
+            <div class="card">
+                <div class="stock-prediction-container">
+                    <div class="text-symbol">{{ key }}</div>
+                    <div class="text-prediction {{ value|lower }}">{{ value }}</div>
+                </div>
+                <a class="card-button" href="https://finance.yahoo.com/quote/{{key}}/">More Info</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        
+        
+    </body>
+</html>

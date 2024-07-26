@@ -5,8 +5,7 @@ from bson.objectid import ObjectId
 import stripe
 import os   
 from pymongo.mongo_client import MongoClient
-
-
+from threading import Thread
 from models import multistock 
 
 #get env vars
@@ -34,6 +33,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 86400  # Sessions last for one day
 app.config["SESSION_MONGODB"] = MongoClient(MONGO_URL)
 app.config["SESSION_MONGODB_DB"] = "forestdb"
 app.config["SESSION_MONGODB_COLLECT"] = "sessions"
+
 
 
 def get_header():
@@ -70,6 +70,66 @@ def get_user():
 def is_logged_in():
     return 'user_id' in session
 
+def process_premium_data(timeframe, smoothing, custom_stocks):
+    data = multistock.run_script()
+    global premium_data
+    premium_data = data
+    
+    
+
+@app.route("/premium", methods=['POST'])
+def premium_post():
+    if not is_logged_in():
+        return render_template('login.html', header=get_header())
+    
+    user_id = session.get('user_id')
+    user = users.find_one({'_id': ObjectId(user_id)})
+    if not user or not user.get('premium', False):
+        return render_template('no_access.html', header=get_header())
+
+    try:
+        form_data = request.form
+        print("Received form data:", form_data)  # Debug print
+        
+        timeframe = form_data.get('timeframe')
+        smoothing = form_data.get('smoothing') == 'true'  # Checkbox returns 'true' as string if checked
+        custom_stocks = form_data.get('customStocks')
+
+        missing_fields = []
+        if not timeframe:
+            missing_fields.append('timeframe')
+        if custom_stocks is None:  # Allow empty string for custom stocks
+            missing_fields.append('customStocks')
+
+        if missing_fields:
+            error_message = f"Missing required form fields: {', '.join(missing_fields)}"
+            app.logger.error(f"Error in premium_post: {error_message}")
+            return jsonify({"error": error_message}), 400
+
+        # Start processing data in a background thread
+        Thread(target=process_premium_data, args=(timeframe, smoothing, custom_stocks)).start()
+
+        # Immediately return the loading page
+        return render_template("premium_load.html", header=get_header())
+    except Exception as e:
+        app.logger.error(f"Error in premium_post: {str(e)}")
+        return jsonify({"error": "An error occurred processing your request"}), 500
+
+@app.route("/premium_data", methods=['GET'])
+def get_premium_data():
+    if not is_logged_in():
+        return jsonify({"error": "Not logged in"}), 401
+    
+    user_id = session.get('user_id')
+    user = users.find_one({'_id': ObjectId(user_id)})
+    if not user or not user.get('premium', False):
+        return jsonify({"error": "No premium access"}), 403
+
+    global premium_data
+    if premium_data is not None:
+        return jsonify(premium_data)
+    else:
+        return jsonify({"status": "processing"}), 202
 
 @app.route('/premium', methods=['GET'])
 def premium():
@@ -78,7 +138,9 @@ def premium():
     user_id = session.get('user_id')
     user = users.find_one({'_id': ObjectId(user_id)})
     if user and user.get('premium', False):
-        return render_template('premium.html', header=get_header())
+        d = multistock.run_script()
+        return render_template('premium.html', header=get_header(), data = d)
+    
     return render_template('no_access.html', header=get_header())
 
     

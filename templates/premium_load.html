@@ -23,6 +23,25 @@
                 height: 100vh;
             }
     </style>
+    <script>
+        function checkPremiumData() {
+            fetch('/premium_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "processing") {
+                        // Data not ready yet, check again in 2 seconds
+                        setTimeout(checkPremiumData, 2000);
+                    } else {
+                        // Data is ready, update the page or redirect
+                        window.location.href = '/premium';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        // Start checking for data
+        checkPremiumData();
+    </script>
 </head>
 <body>
     {{header | safe}}     

@@ -290,6 +290,8 @@ best_params = {
 }
 
 
+
+
 def grab_price_data(tickers_list):  
     full_price_history = []
 
@@ -366,14 +368,8 @@ def fetch_closing_prices(symbols, prediction_date):
     # Ensure symbols is a list for proper handling by yfinance
     if isinstance(symbols, str):
         symbols = [symbols]
-
-    # Check if the prediction_date is a Monday
-    if prediction_date.weekday() == 0:  # 0 is Monday
-        # Set start_date to the previous Friday
-        start_date = prediction_date - timedelta(days=1)
-    else:
-        # Typically, the previous day's close is needed
-        start_date = prediction_date - timedelta(days=1)
+    prediction_date = datetime.today().strftime('%Y-%m-%d')
+    start_date = prediction_date - timedelta(days=1)
 
     end_date = prediction_date
 
